@@ -1,0 +1,229 @@
+# AI Predictive Maintenance Configuration
+
+# Project Information
+project:
+  name: "ai-predictive-maintenance-iot"
+  version: "1.0.0"
+  description: "AI-driven predictive maintenance for IoT devices"
+
+# Data Configuration
+data:
+  raw_data_path: "data/raw/"
+  processed_data_path: "data/processed/"
+  model_path: "data/models/"
+
+  # Feature columns from IoT sensors
+  features:
+    - temperature
+    - vibration
+    - pressure
+    - rotation_speed
+    - torque
+    - tool_wear
+    - power_consumption
+    - operating_hours
+
+  target_column: "failure_prediction"
+
+  # Data preprocessing parameters
+  preprocessing:
+    sequence_length: 50  # Number of time steps for LSTM
+    prediction_horizon: 24  # Hours ahead to predict
+    train_test_split: 0.8
+    validation_split: 0.2
+    normalization: "min_max"  # Options: min_max, standard, robust
+    handle_missing: "interpolate"  # Options: interpolate, forward_fill, drop
+
+  # Data quality thresholds
+  quality:
+    max_missing_ratio: 0.1
+    outlier_detection_method: "isolation_forest"
+    outlier_threshold: 0.1
+
+# Model Configuration
+model:
+  type: "lstm"
+  architecture:
+    lstm_units: [128, 64, 32]
+    dropout_rate: 0.2
+    dense_units: [64, 32]
+    activation: "relu"
+    output_activation: "sigmoid"
+
+  training:
+    batch_size: 64
+    epochs: 100
+    learning_rate: 0.001
+    optimizer: "adam"
+    loss_function: "binary_crossentropy"
+    metrics: ["accuracy", "precision", "recall"]
+    early_stopping:
+      enabled: true
+      patience: 10
+      monitor: "val_loss"
+
+  # Model performance thresholds
+  performance:
+    min_accuracy: 0.85
+    min_precision: 0.80
+    min_recall: 0.80
+    max_false_positive_rate: 0.15
+
+# AWS Configuration
+aws:
+  region: "us-east-1"
+  profile: "default"
+
+  # SageMaker Configuration
+  sagemaker:
+    role_arn: "arn:aws:iam::YOUR_ACCOUNT:role/SageMakerExecutionRole"
+    instance_type: "ml.m5.xlarge"
+    instance_count: 1
+    max_runtime: 3600  # seconds
+
+    # Endpoint configuration
+    endpoint:
+      instance_type: "ml.m5.large"
+      initial_instance_count: 1
+      auto_scaling:
+        enabled: true
+        min_capacity: 1
+        max_capacity: 10
+        target_cpu_utilization: 70
+
+    # Model registry
+    model_package_group: "predictive-maintenance-models"
+
+  # S3 Configuration
+  s3:
+    bucket: "your-predictive-maintenance-bucket"
+    data_prefix: "data/"
+    model_prefix: "models/"
+    logs_prefix: "logs/"
+
+  # IoT Core Configuration
+  iot:
+    endpoint: "your-iot-endpoint.amazonaws.com"
+    port: 8883
+    ca_file: "certificates/root-CA.crt"
+    cert_file: "certificates/device.pem.crt"
+    key_file: "certificates/private.pem.key"
+
+    # MQTT Topics
+    topics:
+      sensor_data: "predictive-maintenance/sensor-data"
+      predictions: "predictive-maintenance/predictions"
+      alerts: "predictive-maintenance/alerts"
+
+  # SNS Configuration for Alerts
+  sns:
+    topic_arn: "arn:aws:sns:us-east-1:YOUR_ACCOUNT:predictive-maintenance-alerts"
+    email_subscribers:
+      - "maintenance-team@company.com"
+      - "operations@company.com"
+
+# IoT Sensor Configuration
+sensors:
+  data_collection:
+    frequency: 10  # seconds between readings
+    batch_size: 100
+    buffer_size: 1000
+
+  # Sensor specifications
+  temperature:
+    unit: "celsius"
+    range: [-20, 150]
+    precision: 0.1
+
+  vibration:
+    unit: "mm/s"
+    range: [0, 100]
+    precision: 0.01
+
+  pressure:
+    unit: "bar"
+    range: [0, 50]
+    precision: 0.1
+
+  rotation_speed:
+    unit: "rpm"
+    range: [0, 5000]
+    precision: 1
+
+  torque:
+    unit: "nm"
+    range: [0, 1000]
+    precision: 0.1
+
+# Monitoring Configuration
+monitoring:
+  # Performance monitoring
+  model_performance:
+    drift_detection: true
+    performance_degradation_threshold: 0.05
+    retraining_threshold: 0.10
+
+  # System monitoring
+  system:
+    cpu_threshold: 80
+    memory_threshold: 85
+    disk_threshold: 90
+
+  # Alerting
+  alerts:
+    email_enabled: true
+    sms_enabled: true
+    slack_enabled: false
+
+    # Alert conditions
+    conditions:
+      equipment_failure_probability: 0.8
+      sensor_anomaly_score: 0.9
+      model_performance_drop: 0.1
+
+  # Dashboard configuration
+  dashboard:
+    refresh_interval: 30  # seconds
+    historical_data_window: 720  # hours (30 days)
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+  handlers:
+    console:
+      enabled: true
+      level: "INFO"
+    file:
+      enabled: true
+      filename: "logs/application.log"
+      max_size: "10MB"
+      backup_count: 5
+    cloudwatch:
+      enabled: true
+      log_group: "/aws/predictive-maintenance/application"
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+  cors_enabled: true
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 100
+
+  # Authentication
+  authentication:
+    enabled: true
+    jwt_secret: "your-jwt-secret-key"
+    token_expiry: 3600  # seconds
+
+# Testing Configuration
+testing:
+  test_data_ratio: 0.1
+  mock_sensor_data: true
+  performance_benchmarks:
+    inference_time_ms: 100
+    throughput_requests_per_second: 50
