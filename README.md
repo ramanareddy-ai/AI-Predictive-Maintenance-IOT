@@ -186,7 +186,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 For support and questions:
-- 📧 Email: support@yourcompany.com
+- 📧 Email: ramanadata568@gmail.com
 - 📖 Documentation: [docs/](docs/)
 - 🐛 Issues: [GitHub Issues](https://github.com/your-username/ai-predictive-maintenance-iot/issues)
 
